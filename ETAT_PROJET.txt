@@ -208,7 +208,7 @@ fraud-detection/
 ├── data/processed/              # Test set sauvegardé
 ├── notebooks/                   # 5 notebooks Jupyter
 ├── figures/                     # Visualisations PNG
-├── tests/test_api.py            # 10 tests pytest
+├── tests/integration/test_api.py            # 10 tests pytest
 ├── docs/                        # Documentation
 ├── Dockerfile                   # Image Docker
 ├── docker-compose.yml           # 3 services

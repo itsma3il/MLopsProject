@@ -313,13 +313,13 @@ find . -type f -name "*.pyc" -delete
 pytest tests/
 
 # Run specific test file
-pytest tests/test_data_contract.py
+pytest tests/unit/test_data_contract.py
 
 # Run with coverage
 pytest tests/ --cov=src --cov-report=html
 
 # Run API tests
-pytest tests/test_api.py
+pytest tests/integration/test_api.py
 
 # Run in verbose mode
 pytest -v tests/

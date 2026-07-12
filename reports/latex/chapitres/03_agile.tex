@@ -1,0 +1,62 @@
+\chapter{Gestion Agile}
+
+\section{Organisation}
+
+Le dépôt fournit une documentation Agile dans \repoPath{fraud-detection/docs/project/agile.md}. Elle définit les rôles attendus, le product backlog, les user stories et un déroulement en trois sprints. Les noms réels des membres de l'équipe restent à compléter dans le document source.
+
+\begin{table}[htbp]
+\centering
+\caption{Rôles Agile attendus}
+\begin{tabular}{ll}
+\toprule
+Rôle & Responsabilité\\
+\midrule
+Product Owner & Priorisation métier et validation de la valeur livrée.\\
+Scrum Master & Facilitation des sprints et suivi des obstacles.\\
+Data Engineer & Ingestion, DuckDB, dbt, contrats et qualité.\\
+ML Engineer & Entraînement, évaluation, MLflow et serving.\\
+Data Analyst & EDA, interprétation des métriques et restitution métier.\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Product Backlog}
+
+\begin{longtable}{p{0.10\textwidth}p{0.45\textwidth}p{0.13\textwidth}p{0.22\textwidth}}
+\caption{Backlog produit synthétisé}\\
+\toprule
+ID & User story & Priorité & Critère d'acceptation\\
+\midrule
+\endfirsthead
+\toprule
+ID & User story & Priorité & Critère d'acceptation\\
+\midrule
+\endhead
+US-01 & Soumettre une transaction et obtenir un score de fraude. & Haute & \repoPath{POST /predict} retourne prédiction, probabilité et risque.\\
+US-02 & Ingérer le dataset Kaggle dans DuckDB. & Haute & dlt crée \repoPath{raw.creditcard_transactions}.\\
+US-03 & Disposer d'une table transformée et documentée. & Haute & dbt construit \repoPath{fraud_features} avec tests.\\
+US-04 & Tracker les expériences ML. & Haute & MLflow contient paramètres, métriques, artefacts et modèle.\\
+US-05 & Fournir une interface simple. & Moyenne & Streamlit consomme l'API.\\
+US-06 & Orchestrer le pipeline. & Haute & Dagster matérialise ingestion, transformation, training, évaluation et monitoring.\\
+US-07 & Automatiser les tests. & Haute & GitHub Actions exécute les tests et le build.\\
+US-08 & Surveiller le service. & Moyenne & \repoPath{/metrics} expose les compteurs runtime.\\
+\bottomrule
+\end{longtable}
+
+\section{Planification des Sprints}
+
+\subsection{Sprint 1: Cadrage et Baseline ML}
+
+Objectif: livrer un premier modèle, l'API et une compréhension initiale des données. Les travaux couvrent l'EDA, le preprocessing, l'entraînement sans leakage, FastAPI et Streamlit. La review consiste en une démonstration d'une prédiction et une lecture des métriques.
+
+\subsection{Sprint 2: DataOps et Qualité}
+
+Objectif: industrialiser la donnée. Les travaux couvrent le loader Kaggle, dlt, DuckDB, dbt, le contrat de données, les tests qualité et le lineage. La review démontre le flux \repoPath{dlt -> DuckDB -> dbt build}.
+
+\subsection{Sprint 3: MLOps, Déploiement et Monitoring}
+
+Objectif: rendre le projet exploitable de bout en bout. Les travaux couvrent MLflow, Dagster, \repoPath{/metrics}, Docker/Podman Compose, GitHub Actions, la documentation et le rapport.
+
+\section{Analyse Agile}
+
+La démarche est cohérente avec une progression incrémentale: d'abord la valeur ML minimale, ensuite la fiabilisation DataOps, enfin l'exploitation MLOps. Pour finaliser le livrable Agile, il reste à renseigner les noms des membres, les dates de sprint et les décisions prises lors des reviews et rétrospectives réelles.

@@ -1,0 +1,85 @@
+\chapter{Composant Machine Learning}
+
+\section{Dataset et Déséquilibre}
+
+Le projet utilise le dataset Kaggle Credit Card Fraud Detection, composé d'environ 284\,807 transactions dont 492 fraudes. La classe positive représente environ 0,17\% des observations, ce qui impose une stratégie adaptée aux classes fortement déséquilibrées.
+
+Les variables \repoPath{V1} à \repoPath{V28} sont anonymisées par PCA. Les variables lisibles sont \repoPath{Time}, \repoPath{Amount} et \repoPath{Class}.
+
+\section{Préparation des Données}
+
+Le pipeline suit les étapes suivantes:
+
+\begin{enumerate}
+    \item chargement du dataset;
+    \item nettoyage et suppression des doublons;
+    \item clipping des montants extrêmes selon la logique de preprocessing;
+    \item feature engineering;
+    \item split stratifié train, validation et test;
+    \item scaling et SMOTE uniquement dans les folds de cross-validation via \repoPath{imblearn.Pipeline}.
+\end{enumerate}
+
+Le point méthodologique essentiel est l'absence de data leakage: le scaler et SMOTE ne sont pas ajustés avant le split, et le test set reste intouché jusqu'à l'évaluation finale.
+
+\section{Feature Engineering}
+
+Le projet ajoute 9 variables dérivées aux 30 variables initiales, pour un total de 39 features attendues par le modèle. Les principales familles sont:
+
+\begin{itemize}
+    \item variables temporelles: heure transactionnelle et période de journée;
+    \item variables de montant: log, bins et interactions;
+    \item statistiques sur les composantes PCA: moyenne et écart-type;
+    \item score de risque composite construit à partir de variables corrélées à la fraude.
+\end{itemize}
+
+\section{Modèles Comparés}
+
+Le script \repoPath{src/core/models/train.py} compare quatre familles:
+
+\begin{itemize}
+    \item Logistic Regression;
+    \item Decision Tree;
+    \item Random Forest;
+    \item XGBoost.
+\end{itemize}
+
+La sélection se fait sur validation, en tenant compte de la PR-AUC, du F1-score validation et du F1-score de cross-validation. Le modèle final est ré-entraîné sur train + validation, puis évalué une seule fois sur le test set.
+
+\section{Résultats}
+
+\begin{table}[htbp]
+\centering
+\caption{Matrice de confusion finale}
+\begin{tabular}{lrr}
+\toprule
+ & Prédit normal & Prédit fraude\\
+\midrule
+Réel normal & 42\,485 & 3\\
+Réel fraude & 15 & 56\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.82\textwidth]{../fraud-detection/figures/feature_importance.png}
+\caption{Importance des variables issue des analyses du projet}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.82\textwidth]{../fraud-detection/figures/threshold_optimization.png}
+\caption{Analyse du seuil de décision}
+\end{figure}
+
+\section{Artefacts}
+
+Les artefacts principaux sont:
+
+\begin{itemize}
+    \item \repoPath{models/best_model.joblib}: pipeline complet sauvegardé;
+    \item \repoPath{models/scaler.joblib}: scaler de secours;
+    \item \repoPath{models/feature_columns.json}: colonnes attendues en prédiction;
+    \item \repoPath{models/metrics.json}: métriques finales;
+    \item \repoPath{models/reference_stats.json}: statistiques de référence pour monitoring si générées.
+\end{itemize}

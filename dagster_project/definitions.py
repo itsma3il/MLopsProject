@@ -5,14 +5,14 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-from dagster import AssetExecutionContext, Definitions, MaterializeResult, asset
+from dagster import Definitions, MaterializeResult, asset
 
 from config.settings import DATA_RAW, DUCKDB_PATH, PROJECT_ROOT
-from dataops.ingestion import assert_duckdb_table, ingest_with_dlt
-from monitoring.metrics import load_reference_stats
-from src.dataset_loader import ensure_dataset
-from src.evaluate import run_evaluation
-from src.train import run_training_pipeline
+from src.core.data.ingestion import assert_duckdb_table, ingest_with_dlt
+from src.core.monitoring.metrics import load_reference_stats
+from src.core.data.dataset_loader import ensure_dataset
+from src.core.models.evaluate import run_evaluation
+from src.core.models.train import run_training_pipeline
 
 
 DBT_DIR = PROJECT_ROOT / "dbt_fraud"
@@ -25,7 +25,7 @@ def download_dataset() -> MaterializeResult:
 
 
 @asset(deps=[download_dataset], description="Load Kaggle CSV into DuckDB raw schema with dlt.")
-def ingest_data(context: AssetExecutionContext) -> MaterializeResult:
+def ingest_data(context) -> MaterializeResult:
     ingest_with_dlt(DATA_RAW / "creditcard.csv")
     rows = assert_duckdb_table()
     context.log.info(f"Loaded {rows} raw transactions into {DUCKDB_PATH}")
@@ -33,7 +33,7 @@ def ingest_data(context: AssetExecutionContext) -> MaterializeResult:
 
 
 @asset(deps=[ingest_data], description="Run dbt transformations and data tests on DuckDB.")
-def dbt_transform(context: AssetExecutionContext) -> MaterializeResult:
+def dbt_transform(context) -> MaterializeResult:
     cmd = ["dbt", "build", "--profiles-dir", ".", "--project-dir", "."]
     result = subprocess.run(cmd, cwd=DBT_DIR, check=True, capture_output=True, text=True)
     context.log.info(result.stdout)

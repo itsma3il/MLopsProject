@@ -1,0 +1,72 @@
+\chapter{Pipeline DataOps}
+
+\section{Ingestion avec dlt}
+
+Le pipeline d'ingestion est implémenté dans \repoPath{src/core/data/ingestion.py}. Il charge le fichier Kaggle, applique le contrat via \repoPath{assert_creditcard_contract}, puis exécute un pipeline dlt vers DuckDB.
+
+La table cible est \repoPath{raw.creditcard_transactions}. Le mode \repoPath{replace} est utilisé pour garantir une reconstruction reproductible de l'état raw à partir de la source.
+
+\section{Stockage DuckDB}
+
+DuckDB est utilisé comme entrepôt local, léger et reproductible. Il répond au besoin pédagogique de disposer d'un stockage analytique sans dépendance à une infrastructure cloud. Le chemin configuré est \repoPath{data/warehouse/fraud.duckdb}.
+
+\section{Transformations dbt}
+
+Le projet dbt est placé dans \repoPath{fraud-detection/dbt_fraud}. Il contient deux niveaux principaux:
+
+\begin{itemize}
+    \item \repoPath{stg_transactions}: table nettoyée, typée et dédupliquée;
+    \item \repoPath{fraud_features}: table orientée ML contenant les variables originales et les features dérivées.
+\end{itemize}
+
+\subsection{Staging}
+
+Le modèle \repoPath{stg_transactions.sql} sélectionne les lignes valides, caste les types et supprime les doublons. Les règles principales sont:
+
+\begin{itemize}
+    \item \repoPath{Time}, \repoPath{Amount} et \repoPath{Class} non nuls;
+    \item \repoPath{Class} limitée aux valeurs 0 et 1;
+    \item \repoPath{Amount} positif ou nul;
+    \item variables PCA castées en double.
+\end{itemize}
+
+\subsection{Mart de Features}
+
+Le modèle \repoPath{fraud_features.sql} produit des variables utiles au modèle:
+
+\begin{itemize}
+    \item heure transactionnelle;
+    \item période de la journée;
+    \item transformation logarithmique du montant;
+    \item binning du montant;
+    \item moyenne et écart-type des variables PCA;
+    \item score de risque composite;
+    \item interactions \repoPath{amount_x_v14} et \repoPath{amount_x_v17}.
+\end{itemize}
+
+\section{Orchestration Dagster}
+
+Dagster matérialise les assets suivants:
+
+\begin{enumerate}
+    \item \repoPath{download_dataset};
+    \item \repoPath{ingest_data};
+    \item \repoPath{dbt_transform};
+    \item \repoPath{train_model};
+    \item \repoPath{evaluate_model};
+    \item \repoPath{monitor_model}.
+\end{enumerate}
+
+Cette orchestration relie le DataOps au MLOps: la donnée validée alimente dbt, puis le pipeline d'entraînement et les métriques de monitoring.
+
+\section{Reproductibilité}
+
+La reproductibilité est assurée par:
+
+\begin{itemize}
+    \item une configuration centralisée dans \repoPath{config/settings.py};
+    \item un \repoPath{RANDOM_STATE} utilisé dans les splits, SMOTE et modèles;
+    \item des artefacts sauvegardés sous \repoPath{models/};
+    \item des commandes documentées dans le README;
+    \item Docker Compose pour aligner les services d'exécution.
+\end{itemize}

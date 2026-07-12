@@ -88,23 +88,22 @@ Aucun scaling manuel n'est nécessaire à la prédiction : le pipeline gère tou
 ## Architecture du projet
 
 ```
-fraud-detection/
+MLopsProject/
 ├── config/
 │   └── settings.py              # Configuration centralisée (paths, DB, seuils)
 ├── src/
-│   ├── preprocessing.py         # Nettoyage + scaling
-│   ├── feature_engineering.py   # 9 features dérivées
-│   ├── train.py                 # Pipeline d'entraînement complet
-│   ├── evaluate.py              # Évaluation sur test set
-│   ├── predict.py               # Classe FraudPredictor
-│   └── dataset_loader.py        # Téléchargement auto Kaggle
-├── api/
-│   ├── main.py                  # FastAPI (endpoints + lifespan)
-│   ├── schemas.py               # Validation Pydantic (input/output)
-│   └── model_loader.py          # Singleton de chargement modèle
-├── db/
-│   ├── database.py              # SQLAlchemy engine + session
-│   └── models.py                # Table Prediction
+│   ├── core/
+│   │   ├── data/                # Kaggle loader, preprocessing, features, DuckDB/dlt ingestion
+│   │   ├── models/              # Training, evaluation, prediction, metrics
+│   │   ├── monitoring/          # Metrics and monitoring helpers
+│   │   └── pipeline/            # Pipeline runner, dashboard, diagrams
+│   ├── api/                     # FastAPI implementation
+│   ├── db/                      # SQLAlchemy implementation
+│   └── utils/                   # Data contract and shared helpers
+├── api/                         # Compatibility wrappers for uvicorn api.main:app
+├── db/                          # Compatibility wrappers for old imports
+├── dataops/                     # Compatibility wrapper for ingestion CLI
+├── monitoring/                  # Compatibility wrappers for monitoring imports
 ├── webapp/
 │   └── app.py                   # Streamlit (4 pages)
 ├── models/                      # Artefacts générés après entraînement
@@ -115,9 +114,18 @@ fraud-detection/
 ├── data/
 │   ├── raw/                     # Dataset Kaggle (creditcard.csv)
 │   └── processed/               # X_test.csv, y_test.csv
-├── notebooks/                   # Jupyter : EDA, preprocessing, training, evaluation
+├── notebooks/
+│   └── colab/                   # Google Colab training/evaluation notebook
 ├── tests/
-│   └── test_api.py              # Tests pytest (10 tests)
+│   ├── unit/                    # Unit tests
+│   └── integration/             # API/integration tests
+├── docs/
+│   ├── guides/                  # Install, usage, Colab guide
+│   ├── architecture/            # Architecture and model diagnosis
+│   ├── project/                 # Vision, Agile, final report
+│   └── reports/                 # Change/results notes and experiments
+├── reports/
+│   └── latex/                   # Academic LaTeX report
 ├── Dockerfile
 ├── docker-compose.yml
 ├── requirements.txt
@@ -134,7 +142,7 @@ Le projet contient maintenant les livrables MLOps/DataOps demandés par le modul
 - **MLflow**: tracking et registry lors de `python -m src.train`
 - **Monitoring**: `GET /metrics` et `GET /model/info`
 - **Data Contract**: `contracts/creditcard_fraud_contract.yml`
-- **Documentation**: `docs/vision.md`, `docs/agile.md`, `docs/architecture.md`, `docs/install.md`, `docs/usage.md`, `docs/colab_training_guide.md`, `docs/model_accuracy_diagnosis.md`, `docs/final_report.md`
+- **Documentation**: `docs/project/vision.md`, `docs/project/agile.md`, `docs/architecture/architecture.md`, `docs/guides/install.md`, `docs/guides/usage.md`, `docs/guides/colab_training_guide.md`, `docs/architecture/model_accuracy_diagnosis.md`, `docs/project/final_report.md`, `docs/project/repository_structure.md`
 
 Commandes principales:
 
