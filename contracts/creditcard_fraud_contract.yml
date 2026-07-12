@@ -1,0 +1,42 @@
+version: 1
+name: creditcard_fraud_transactions
+owner: fraud-detection-mlops-team
+source: kagglehub.dataset_download("mlg-ulb/creditcardfraud")
+description: Contract for the Kaggle credit-card fraud dataset used by the MLOps project.
+
+columns:
+  Time:
+    type: numeric
+    required: true
+    nullable: false
+    description: Seconds elapsed between this transaction and the first transaction.
+  Amount:
+    type: numeric
+    required: true
+    nullable: false
+    min: 0
+    description: Transaction amount.
+  Class:
+    type: integer
+    required: true
+    nullable: false
+    accepted_values: [0, 1]
+    description: Fraud label, where 1 is fraudulent.
+  V1-V28:
+    type: numeric
+    required: true
+    nullable: false
+    description: PCA-anonymized transaction features from the original dataset.
+
+quality_rules:
+  - All required columns must be present.
+  - All required columns must be numeric and non-null.
+  - Amount must be greater than or equal to zero.
+  - Class must contain only 0 and 1.
+  - Duplicate rows are removed during staging.
+
+lineage:
+  - Kaggle dataset -> data/raw/creditcard.csv
+  - data/raw/creditcard.csv -> dlt -> DuckDB raw.creditcard_transactions
+  - raw.creditcard_transactions -> dbt stg_transactions -> dbt fraud_features
+  - fraud_features / raw CSV -> sklearn training pipeline -> MLflow registry -> FastAPI

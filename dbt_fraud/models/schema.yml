@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: stg_transactions
+    description: Cleaned and deduplicated transaction records from Kaggle.
+    columns:
+      - name: transaction_time
+        data_tests: [not_null]
+      - name: amount
+        data_tests: [not_null]
+      - name: class
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1]
+
+  - name: fraud_features
+    description: Training-ready fraud detection feature table with engineered features.
+    columns:
+      - name: Time
+        data_tests: [not_null]
+      - name: Amount
+        data_tests: [not_null]
+      - name: Class
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1]
+      - name: risk_score
+        description: Composite risk signal from highly correlated PCA features.
+      - name: amount_x_v14
+        description: Amount and V14 interaction feature.
+      - name: amount_x_v17
+        description: Amount and V17 interaction feature.

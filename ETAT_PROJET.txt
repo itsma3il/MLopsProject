@@ -1,0 +1,241 @@
+========================================================================
+        ÉTAT DU PROJET - FRAUD DETECTION SYSTEM
+        Date: 25 Mai 2026
+========================================================================
+
+
+========================================================================
+1. RÉSUMÉ GÉNÉRAL
+========================================================================
+
+Le projet est un système complet de détection de fraude par ML.
+Il utilise le dataset Kaggle "Credit Card Fraud Detection" (284 807 
+transactions, ~0.17% de fraudes).
+
+Stack technique:
+- Python 3.11+
+- scikit-learn / imbalanced-learn / XGBoost
+- FastAPI (API REST)
+- Streamlit (Frontend web)
+- PostgreSQL (Historique)
+- Docker Compose (Déploiement)
+
+
+========================================================================
+2. CE QUI MARCHE ✅
+========================================================================
+
+PIPELINE ML
+  ✅ Dataset réel Kaggle chargé (150 Mo, 284 807 lignes)
+  ✅ Preprocessing (nettoyage, cap outliers P99)
+  ✅ Feature engineering (9 features dérivées)
+  ✅ Split stratifié train/test (80/20)
+  ✅ Entraînement 4 modèles (LR, DT, RF, XGBoost)
+  ✅ Cross-validation 5-fold avec SMOTE inside CV
+  ✅ Sélection automatique du meilleur modèle
+  ✅ Aucun data leakage (scaling + SMOTE inside pipeline)
+  ✅ Commande: python -m src.train
+
+MODÈLE SAUVEGARDÉ
+  ✅ Pipeline complet: RobustScaler → SMOTE → RandomForestClassifier
+  ✅ Pas de double scaling (le pipeline gère tout)
+  ✅ 39 features (30 originales + 9 engineered)
+  ✅ Prédiction cohérente (batch = single = evaluate)
+
+MÉTRIQUES (test set intouché)
+  ✅ Accuracy:  99.96%
+  ✅ Precision: 94.9%
+  ✅ Recall:    78.9%
+  ✅ F1-Score:  86.2%
+  ✅ ROC-AUC:   97.9%
+  ✅ PR-AUC:    82.0%
+  ✅ Confusion: TN=42485, FP=3, FN=15, TP=56
+
+PRÉDICTION
+  ✅ Classe FraudPredictor fonctionne
+  ✅ predict_single() → résultat correct
+  ✅ predict_batch() → résultats cohérents
+  ✅ Niveaux de risque: LOW / MEDIUM / HIGH / CRITICAL
+  ✅ Commande: python -c "from src.predict import FraudPredictor; ..."
+
+API FASTAPI
+  ✅ GET /           → info API (200)
+  ✅ GET /health     → health check + statut modèle (200)
+  ✅ POST /predict   → prédiction unique (200)
+  ✅ POST /batch_predict → prédiction batch max 1000 (200)
+  ✅ GET /predictions/history → historique DB (200, [] si pas de DB)
+  ✅ Validation Pydantic (422 si input invalide)
+  ✅ Gestion erreur DB (ne crash pas si PostgreSQL absent)
+  ✅ Documentation Swagger auto: http://localhost:8000/docs
+  ✅ Commande: uvicorn api.main:app --reload --port 8000
+
+FRONTEND STREAMLIT
+  ✅ Page Prédiction (formulaire + jauge Plotly)
+  ✅ Page Upload CSV (batch par lots de 100 + progress bar)
+  ✅ Page Historique (tableau depuis PostgreSQL)
+  ✅ Page Dashboard (métriques + camembert + histogramme)
+  ✅ Gestion erreur si API non disponible
+  ✅ Commande: streamlit run webapp/app.py
+
+BASE DE DONNÉES
+  ✅ SQLAlchemy + PostgreSQL
+  ✅ Table "predictions" (id, timestamp, amount, prediction, prob, risk)
+  ✅ Insertion automatique à chaque prédiction
+  ✅ pool_pre_ping=True (reconnexion auto)
+  ✅ L'API fonctionne même SANS PostgreSQL
+
+DOCKER
+  ✅ Dockerfile fonctionnel
+  ✅ docker-compose.yml (3 services: api, webapp, db)
+  ✅ Health check PostgreSQL
+  ✅ Réseau interne (webapp → api:8000, api → db:5432)
+  ✅ Volumes pour models/ et data/
+  ✅ .dockerignore configuré
+  ✅ Commande: docker-compose up --build
+
+TESTS
+  ✅ 10 tests pytest - TOUS PASSENT
+  ✅ Tests preprocessing (3)
+  ✅ Tests feature engineering (2)
+  ✅ Tests API (5)
+  ✅ Commande: pytest tests/ -v
+
+NOTEBOOKS
+  ✅ 01_eda.ipynb (analyse exploratoire)
+  ✅ 02_preprocessing.ipynb (nettoyage + visualisations)
+  ✅ 03_training.ipynb (entraînement + comparaison)
+  ✅ 04_evaluation.ipynb (métriques + threshold optimization)
+  ✅ 05_imbalanced_experiments.ipynb (expérimental avancé)
+
+ARTEFACTS
+  ✅ models/best_model.joblib (22 Mo - pipeline complet)
+  ✅ models/scaler.joblib (backup scaler)
+  ✅ models/feature_columns.json (39 colonnes)
+  ✅ models/metrics.json (métriques évaluation)
+  ✅ models/random_forest.joblib (modèle individuel)
+  ✅ models/xgboost.joblib (modèle individuel)
+  ✅ models/decision_tree.joblib (modèle individuel)
+  ✅ models/logistic_regression.joblib (modèle individuel)
+  ✅ data/processed/X_test.csv + y_test.csv
+  ✅ figures/ (8 visualisations PNG)
+
+
+========================================================================
+3. CE QUI NE MARCHE PAS / LIMITATIONS ⚠️
+========================================================================
+
+POSTGRESQL EN LOCAL
+  ⚠️ Nécessite d'installer PostgreSQL ou de lancer le container Docker
+  ⚠️ Sans PostgreSQL: l'historique retourne [] (pas de crash)
+  ⚠️ La table se crée automatiquement au démarrage de l'API
+
+DOCKER
+  ⚠️ Nécessite Docker Desktop installé et lancé
+  ⚠️ Le build initial est long (téléchargement dépendances)
+  ⚠️ Les modèles doivent être entraînés AVANT le build
+      (ou montés via volume ./models:/app/models)
+
+NOTEBOOK 05 (EXPÉRIMENTAL)
+  ⚠️ Nécessite LightGBM installé (pip install lightgbm)
+  ⚠️ Exécution longue (~15-20 min pour tout le notebook)
+  ⚠️ One-Class SVM très lent sur le dataset complet
+
+DATASET
+  ⚠️ Le fichier creditcard.csv (150 Mo) n'est PAS dans git
+  ⚠️ Doit être téléchargé manuellement ou via kagglehub
+  ⚠️ Nécessite un compte Kaggle pour le téléchargement auto
+
+DÉPLOIEMENT CLOUD
+  ⚠️ Non déployé (configuration prête mais pas activée)
+  ⚠️ Nécessite un service PostgreSQL externe (Render, Railway, etc.)
+
+
+========================================================================
+4. COMMENT LANCER LE PROJET
+========================================================================
+
+--- OPTION A: En local (sans Docker) ---
+
+  1. Installer Python 3.11+
+  2. cd fraud-detection
+  3. python -m venv venv
+  4. venv\Scripts\activate
+  5. pip install -r requirements.txt
+  6. Placer creditcard.csv dans data/raw/ (ou lancer train pour auto-download)
+  7. python -m src.train          (5-10 min, entraîne le modèle)
+  8. uvicorn api.main:app --reload --port 8000    (lance l'API)
+  9. streamlit run webapp/app.py                   (lance le frontend)
+  10. Ouvrir http://localhost:8501
+
+  PostgreSQL (optionnel, pour l'historique):
+  docker run -d --name fraud-db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=fraud_detection -p 5432:5432 postgres:16-alpine
+
+
+--- OPTION B: Avec Docker Compose (tout-en-un) ---
+
+  1. Installer Docker Desktop
+  2. cd fraud-detection
+  3. S'assurer que models/best_model.joblib existe (sinon: python -m src.train)
+  4. docker-compose up --build
+  5. API:      http://localhost:8000
+  6. Frontend: http://localhost:8501
+  7. Swagger:  http://localhost:8000/docs
+
+
+========================================================================
+5. STRUCTURE DES FICHIERS
+========================================================================
+
+fraud-detection/
+├── config/settings.py           # Config centralisée
+├── src/
+│   ├── train.py                 # Pipeline entraînement
+│   ├── evaluate.py              # Évaluation test set
+│   ├── predict.py               # Classe FraudPredictor
+│   ├── preprocessing.py         # Nettoyage + scaling
+│   ├── feature_engineering.py   # 9 features dérivées
+│   └── dataset_loader.py        # Téléchargement Kaggle
+├── api/
+│   ├── main.py                  # FastAPI (5 endpoints)
+│   ├── schemas.py               # Validation Pydantic
+│   └── model_loader.py          # Singleton modèle
+├── db/
+│   ├── database.py              # SQLAlchemy engine
+│   └── models.py                # Table Prediction
+├── webapp/app.py                # Streamlit (4 pages)
+├── models/                      # Artefacts ML
+├── data/raw/                    # Dataset Kaggle
+├── data/processed/              # Test set sauvegardé
+├── notebooks/                   # 5 notebooks Jupyter
+├── figures/                     # Visualisations PNG
+├── tests/test_api.py            # 10 tests pytest
+├── docs/                        # Documentation
+├── Dockerfile                   # Image Docker
+├── docker-compose.yml           # 3 services
+├── requirements.txt             # Dépendances
+├── .dockerignore                # Exclusions Docker
+├── .gitignore                   # Exclusions Git
+└── README.md                    # Documentation complète
+
+
+========================================================================
+6. CONCLUSION
+========================================================================
+
+Le projet est FONCTIONNEL et COMPLET pour un portfolio/démo:
+
+  ✅ ML pipeline scientifiquement valide (pas de leakage)
+  ✅ Modèle performant (F1=86%, PR-AUC=82%)
+  ✅ API REST opérationnelle
+  ✅ Frontend web interactif
+  ✅ Base de données pour l'historique
+  ✅ Docker pour le déploiement
+  ✅ Tests automatisés
+  ✅ Documentation complète
+  ✅ Notebooks d'exploration
+
+Seul prérequis pour tout faire tourner:
+  → Avoir le dataset (creditcard.csv) dans data/raw/
+  → Avoir entraîné le modèle (python -m src.train)
+
+========================================================================

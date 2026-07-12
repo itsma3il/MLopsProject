@@ -1,0 +1,57 @@
+\chapter{Annexes}
+
+\section{Inventaire des Documents Existants}
+
+\begin{itemize}
+    \item \repoPath{docs/vision.md}: vision, objectifs, utilisateurs, data strategy.
+    \item \repoPath{docs/agile.md}: backlog, user stories, sprint planning, reviews et rétrospectives.
+    \item \repoPath{docs/architecture.md}: architecture, lineage, monitoring.
+    \item \repoPath{docs/final_report.md}: synthèse initiale du projet.
+    \item \repoPath{docs/install.md}: installation.
+    \item \repoPath{docs/usage.md}: utilisation.
+    \item \repoPath{presentation/final_presentation.md}: support de présentation.
+\end{itemize}
+
+\section{Figures Disponibles}
+
+Le dépôt contient les figures suivantes sous \repoPath{fraud-detection/figures}:
+
+\begin{itemize}
+    \item \repoPath{class_distribution.png};
+    \item \repoPath{amount_analysis.png};
+    \item \repoPath{time_analysis.png};
+    \item \repoPath{correlations.png};
+    \item \repoPath{heatmap.png};
+    \item \repoPath{new_features.png};
+    \item \repoPath{feature_importance.png};
+    \item \repoPath{threshold_optimization.png};
+    \item \repoPath{error_analysis.png}.
+\end{itemize}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.82\textwidth]{../fraud-detection/figures/class_distribution.png}
+\caption{Distribution des classes}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.82\textwidth]{../fraud-detection/figures/amount_analysis.png}
+\caption{Analyse des montants}
+\end{figure}
+
+\section{Commandes Utiles}
+
+\begin{lstlisting}
+# Lancer l'API
+uvicorn api.main:app --reload --port 8000
+
+# Lancer l'interface
+streamlit run webapp/app.py
+
+# Lancer l'orchestration
+dagster dev -m dagster_project.definitions
+
+# Lancer l'ensemble des services
+docker-compose up --build
+\end{lstlisting}

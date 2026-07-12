@@ -1,0 +1,65 @@
+\chapter{Vision du Projet}
+
+\section{Problématique}
+
+Les fraudes bancaires sont rares par rapport au volume total des transactions, mais leur impact financier, opérationnel et réputationnel est élevé. Leur faible fréquence rend la détection difficile: un modèle naïf peut obtenir une accuracy très élevée tout en manquant la majorité des fraudes.
+
+Le projet répond à cette problématique par un produit IA capable d'identifier automatiquement les transactions suspectes et de fournir un score de risque exploitable par des analystes fraude.
+
+\section{Objectifs}
+
+Les objectifs opérationnels sont les suivants:
+
+\begin{itemize}
+    \item construire une chaîne reproductible depuis les données Kaggle jusqu'à un modèle servi par API;
+    \item traiter explicitement le déséquilibre de classes;
+    \item éviter les fuites de données lors du preprocessing, du sampling et de l'évaluation;
+    \item exposer le modèle via une API REST et une interface utilisateur;
+    \item suivre les expériences et les artefacts avec MLflow;
+    \item orchestrer les étapes DataOps/MLOps avec Dagster;
+    \item rendre le projet testable et déployable avec Docker et CI/CD.
+\end{itemize}
+
+\section{Utilisateurs Cibles}
+
+\begin{table}[htbp]
+\centering
+\caption{Utilisateurs cibles et besoins}
+\begin{tabularx}{\textwidth}{p{0.28\textwidth}X}
+\toprule
+Utilisateur & Besoin principal\\
+\midrule
+Analyste fraude & Prioriser les transactions risquées et consulter le score de fraude.\\
+Equipe risque bancaire & Suivre les indicateurs de fraude, de volumétrie et de performance.\\
+Equipe Data/ML & Maintenir les pipelines, reproduire l'entraînement et contrôler le modèle.\\
+Exploitant applicatif & Vérifier la disponibilité, les métriques runtime et l'historique.\\
+Evaluateur pédagogique & Vérifier la conformité aux livrables MLOps/DataOps.\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Valeur Métier}
+
+La valeur métier du projet repose sur quatre axes:
+
+\begin{itemize}
+    \item \textbf{Réactivité}: score de fraude disponible en temps quasi réel via \repoPath{POST /predict}.
+    \item \textbf{Priorisation}: classement implicite des transactions selon la probabilité et le niveau de risque.
+    \item \textbf{Traçabilité}: historique des prédictions, métriques, artefacts et versions de modèle.
+    \item \textbf{Industrialisation}: pipeline reproductible, tests, CI/CD et déploiement containerisé.
+\end{itemize}
+
+\section{Data Strategy}
+
+La stratégie data observée dans le dépôt est structurée autour d'un flux local contrôlé:
+
+\begin{enumerate}
+    \item \textbf{Source}: dataset Kaggle \repoPath{mlg-ulb/creditcardfraud}.
+    \item \textbf{Cache local}: fichier \repoPath{data/raw/creditcard.csv}, non destiné à être versionné.
+    \item \textbf{Ingestion}: chargement par dlt dans DuckDB.
+    \item \textbf{Entrepôt local}: \repoPath{data/warehouse/fraud.duckdb}.
+    \item \textbf{Transformation}: dbt construit les modèles staging et mart.
+    \item \textbf{Contrat}: \repoPath{contracts/creditcard_fraud_contract.yml}.
+    \item \textbf{Expérimentation}: MLflow pour paramètres, métriques, artefacts et registry.
+    \item \textbf{Service}: FastAPI pour les prédictions et Streamlit pour l'interface.
+\end{enumerate}

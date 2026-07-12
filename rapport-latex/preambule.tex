@@ -1,0 +1,72 @@
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2.5cm,headheight=15pt]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{listings}
+\usepackage{pdflscape}
+
+\definecolor{Primary}{HTML}{0B3D5C}
+\definecolor{Accent}{HTML}{0E7C7B}
+\definecolor{SoftGray}{HTML}{F4F6F8}
+\definecolor{DarkGray}{HTML}{2E3440}
+\definecolor{CodeBg}{HTML}{F7F7F7}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=Primary,
+    urlcolor=Accent,
+    citecolor=Primary,
+    pdftitle={Rapport final - Système de détection de fraude bancaire},
+    pdfauthor={Equipe projet MLOps DataOps}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small Rapport MLOps \& DataOps}
+\rhead{\small Détection de fraude}
+\cfoot{\thepage}
+
+\titleformat{\chapter}
+  {\normalfont\huge\bfseries\color{Primary}}
+  {\thechapter}{1em}{}
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{Primary}}
+  {\thesection}{0.8em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{DarkGray}}
+  {\thesubsection}{0.7em}{}
+
+\setlist[itemize]{topsep=3pt,itemsep=2pt,leftmargin=1.2cm}
+\setlist[enumerate]{topsep=3pt,itemsep=2pt,leftmargin=1.2cm}
+\renewcommand{\arraystretch}{1.2}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+\lstdefinestyle{rapportcode}{
+    backgroundcolor=\color{CodeBg},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    rulecolor=\color{SoftGray},
+    columns=fullflexible,
+    keepspaces=true,
+    showstringspaces=false
+}
+\lstset{style=rapportcode}
+
+\newcommand{\repoPath}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\metric}[2]{\textbf{#1} & #2\\}
+\newcommand{\deliverableStatus}[1]{\textbf{\color{Accent}#1}}

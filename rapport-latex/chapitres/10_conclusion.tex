@@ -1,0 +1,34 @@
+\chapter{Conclusion et Perspectives}
+
+\section{Conclusion}
+
+Le projet \repoPath{fraud-detection} constitue une réalisation complète et cohérente pour le module MLOps \& DataOps. Il ne se limite pas à entraîner un modèle: il couvre l'ingestion, la transformation, la qualité, l'entraînement contrôlé, l'évaluation, le tracking, le serving, l'interface utilisateur, la conteneurisation, l'orchestration, le monitoring et la CI/CD.
+
+La performance finale est solide pour un problème fortement déséquilibré: F1-score de 0.8615, PR-AUC de 0.8201 et seulement trois faux positifs sur le jeu de test versionné. La méthodologie anti-leakage est un point fort du projet, notamment grâce à l'utilisation de \repoPath{imblearn.Pipeline} pour isoler le scaling et SMOTE dans les folds de validation.
+
+\section{Points Forts}
+
+\begin{itemize}
+    \item architecture DataOps/MLOps alignée avec les attentes du module;
+    \item intégration réelle de dlt, DuckDB, dbt, Dagster, MLflow, FastAPI et Docker;
+    \item tests automatisés et CI/CD;
+    \item documentation structurée;
+    \item prise en compte du déséquilibre de classes;
+    \item service exploitable via API et interface Streamlit.
+\end{itemize}
+
+\section{Améliorations Recommandées}
+
+\begin{enumerate}
+    \item compléter les noms et responsabilités réelles de l'équipe dans le livrable Agile;
+    \item ajouter un suivi de drift statistique plus avancé;
+    \item définir un seuil de décision optimisé par coût métier;
+    \item sécuriser l'API pour un contexte de production;
+    \item ajouter un workflow clair de promotion modèle dans MLflow;
+    \item automatiser le réentraînement planifié dans Dagster;
+    \item enrichir le rapport avec captures d'écran MLflow, Dagster et Streamlit après démonstration.
+\end{enumerate}
+
+\section{Appréciation Finale}
+
+Le dépôt présente un niveau de maturité supérieur à un projet académique minimal. Les composants sont organisés, les livrables sont majoritairement couverts, et les limites sont clairement identifiables. Après complétion des informations d'équipe et ajout de captures de démonstration, le rapport et le dépôt peuvent servir de livrable final professionnel.

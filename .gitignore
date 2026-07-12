@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.dlt/
+dist/
+build/
+.eggs/
+
+# Virtual env
+venv/
+.env
+
+# Data
+data/raw/*.csv
+data/processed/*.csv
+data/warehouse/
+data/monitoring/
+data/.dlt/
+
+# Models
+models/*.joblib
+models/*.pkl
+models/reference_stats.json
+models/decision_threshold.json
+
+# MLOps / orchestration artifacts
+mlruns/
+.dagster/
+dbt_fraud/target/
+dbt_fraud/dbt_packages/
+dbt_fraud/logs/
+dbt_fraud/.user.yml
+
+# IDE
+.vscode/
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp DB
+*.db

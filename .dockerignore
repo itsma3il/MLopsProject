@@ -1,0 +1,11 @@
+__pycache__
+*.pyc
+.git
+.gitignore
+.pytest_cache
+data/raw/
+notebooks/
+*.md
+venv/
+.env
+test_validation*.db

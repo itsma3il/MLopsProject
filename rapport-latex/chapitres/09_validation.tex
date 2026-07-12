@@ -1,0 +1,57 @@
+\chapter{Validation, Tests et CI/CD}
+
+\section{Tests Automatisés}
+
+Les tests unitaires et d'intégration légère couvrent les points suivants:
+
+\begin{itemize}
+    \item nettoyage des données et scaling;
+    \item génération des features attendues;
+    \item endpoints \repoPath{/}, \repoPath{/health}, \repoPath{/metrics}, \repoPath{/model/info};
+    \item erreurs API attendues: modèle absent, input invalide, batch vide;
+    \item contrat de données et loader dataset.
+\end{itemize}
+
+\section{CI/CD}
+
+La pipeline GitHub Actions \repoPath{.github/workflows/ci.yml} contient deux jobs:
+
+\begin{enumerate}
+    \item \textbf{test}: installation Python 3.11, dépendances, checks d'import, tests \repoPath{pytest}, \repoPath{dbt parse};
+    \item \textbf{container-build}: construction de l'image Docker \repoPath{fraud-detection-mlops:ci}.
+\end{enumerate}
+
+Cette CI vérifie à la fois la cohérence applicative, la validité minimale du projet dbt et la capacité à construire l'image de déploiement.
+
+\section{Commandes de Reproduction}
+
+\begin{lstlisting}
+cd fraud-detection
+python -m dataops.ingestion
+cd dbt_fraud && dbt build --profiles-dir . --project-dir . && cd ..
+python -m src.train
+python -m src.evaluate
+pytest tests/ -q
+docker-compose up --build
+\end{lstlisting}
+
+\section{Analyse des Risques}
+
+\begin{longtable}{p{0.24\textwidth}p{0.36\textwidth}p{0.30\textwidth}}
+\caption{Risques et mesures de réduction}\\
+\toprule
+Risque & Impact & Mesure actuelle ou recommandée\\
+\midrule
+\endfirsthead
+\toprule
+Risque & Impact & Mesure actuelle ou recommandée\\
+\midrule
+\endhead
+Dataset statique & Peu représentatif d'un flux bancaire réel. & Ajouter ingestion incrémentale et tests de fraîcheur.\\
+Variables anonymisées & Interprétabilité métier limitée. & Ajouter méthodes d'explicabilité et données métier si disponibles.\\
+Dérive de données & Dégradation non détectée en production. & Enrichir le monitoring avec Evidently ou tests statistiques.\\
+Seuil de décision & Coût métier non optimisé. & Calibrer le seuil avec coût FP/FN et objectifs métier.\\
+Sécurité API & Service ouvert en démo. & Ajouter authentification, autorisation et rate limiting.\\
+Registry local & Promotion modèle limitée. & Définir workflow staging/production dans MLflow.\\
+\bottomrule
+\end{longtable}

@@ -1,0 +1,67 @@
+\chapter{Résumé Exécutif}
+
+Ce rapport présente l'analyse complète du dépôt \repoPath{fraud-detection}, réalisé dans le cadre du module MLOps \& DataOps. Le projet vise à transformer un dataset brut de transactions bancaires en un produit Data/IA exploitable, reproductible, testable et déployable.
+
+La solution développée couvre l'ensemble du cycle de vie attendu: ingestion DataOps, entrepôt local DuckDB, transformations dbt, contrôle qualité, entraînement Machine Learning sans fuite de données, suivi des expériences MLflow, orchestration Dagster, service de prédiction FastAPI, interface Streamlit, persistance PostgreSQL, monitoring applicatif et pipeline CI/CD.
+
+\section{Synthèse du Produit}
+
+Le produit final est un système de détection de fraude bancaire. Il reçoit une transaction décrite par les variables anonymisées \repoPath{V1} à \repoPath{V28}, \repoPath{Time} et \repoPath{Amount}, applique le feature engineering du projet, puis retourne:
+
+\begin{itemize}
+    \item une prédiction binaire: transaction normale ou frauduleuse;
+    \item une probabilité de fraude;
+    \item un niveau de risque exploitable par un analyste;
+    \item un enregistrement historique dans PostgreSQL lorsque la base est disponible.
+\end{itemize}
+
+\section{Résultats Principaux}
+
+Les métriques versionnées dans \repoPath{fraud-detection/models/metrics.json} indiquent une performance robuste sur le jeu de test:
+
+\begin{table}[htbp]
+\centering
+\caption{Métriques finales du modèle}
+\begin{tabular}{lr}
+\toprule
+Métrique & Valeur\\
+\midrule
+Accuracy & 0.9996\\
+Precision & 0.9492\\
+Recall & 0.7887\\
+F1-score & 0.8615\\
+ROC-AUC & 0.9794\\
+PR-AUC & 0.8201\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La matrice de confusion enregistrée est: TN = 42\,485, FP = 3, FN = 15, TP = 56. Pour un problème très déséquilibré, la précision et la PR-AUC sont plus pertinentes que l'accuracy; le résultat montre donc un bon compromis entre réduction des faux positifs et détection des fraudes.
+
+\section{Couverture des Livrables}
+
+\begin{longtable}{p{0.25\textwidth}p{0.18\textwidth}p{0.47\textwidth}}
+\caption{Synthèse des livrables obligatoires}\\
+\toprule
+Livrable & Statut & Eléments dans le dépôt\\
+\midrule
+\endfirsthead
+\toprule
+Livrable & Statut & Eléments dans le dépôt\\
+\midrule
+\endhead
+Vision projet & \deliverableStatus{Couvert} & \repoPath{docs/vision.md}, problématique, utilisateurs, valeur métier, stratégie data.\\
+Gestion Agile & \deliverableStatus{Couvert à finaliser} & Backlog, user stories et 3 sprints dans \repoPath{docs/agile.md}; les noms des rôles restent à compléter.\\
+Dépôt GitHub & \deliverableStatus{Couvert} & Code source, README, documentation, tests, CI, conteneurisation.\\
+Pipeline DataOps & \deliverableStatus{Couvert} & dlt, DuckDB, dbt et Dagster présents et reliés.\\
+Qualité des données & \deliverableStatus{Couvert} & Data contract YAML, tests Python, tests dbt, documentation de sources et modèles.\\
+Machine Learning & \deliverableStatus{Couvert} & Préparation, entraînement, évaluation, artefacts versionnés, métriques.\\
+MLflow & \deliverableStatus{Couvert} & Tracking des paramètres, métriques, artefacts et modèle enregistré si MLflow est disponible.\\
+Déploiement & \deliverableStatus{Couvert} & FastAPI, Dockerfile, docker-compose avec API, Streamlit, PostgreSQL, MLflow et Dagster.\\
+CI/CD & \deliverableStatus{Couvert} & GitHub Actions: imports, tests unitaires, dbt parse, build container.\\
+\bottomrule
+\end{longtable}
+
+\section{Constat Global}
+
+Le dépôt dépasse le simple prototype ML: il propose une architecture industrialisable et alignée avec les exigences du module. Les principales limites concernent le caractère statique du dataset Kaggle, l'interprétabilité réduite des variables anonymisées par PCA et la nécessité de compléter les noms de l'équipe dans la partie Agile.

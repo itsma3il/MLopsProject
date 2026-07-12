@@ -1,0 +1,22 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw tables loaded by dlt from the Kaggle credit-card fraud dataset.
+    schema: raw
+    tables:
+      - name: creditcard_transactions
+        description: Raw Kaggle transaction rows with PCA-anonymized features and the fraud label.
+        columns:
+          - name: Time
+            description: Seconds elapsed between this transaction and the first transaction.
+            data_tests: [not_null]
+          - name: Amount
+            description: Transaction amount.
+            data_tests: [not_null]
+          - name: Class
+            description: Binary fraud label, 1 means fraud.
+            data_tests:
+              - not_null
+              - accepted_values:
+                  values: [0, 1]

@@ -1,0 +1,62 @@
+\documentclass[12pt,a4paper]{report}
+\input{preambule}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=0.65\linewidth]{images/Logo_Universite_hassan2.png}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \raggedleft
+        \includegraphics[width=0.65\linewidth]{images/logo_departement_mathematique.png}
+    \end{minipage}
+
+    \vspace{2.2cm}
+    {\Large Module MLOps \& DataOps\par}
+    \vspace{0.6cm}
+    {\Huge\bfseries\color{Primary} Rapport final professionnel\par}
+    \vspace{0.4cm}
+    {\LARGE Système de détection de fraude bancaire par Machine Learning\par}
+
+    \vspace{1.5cm}
+    \rule{0.8\textwidth}{0.6pt}
+    \vspace{0.4cm}
+
+    \begin{tabular}{rl}
+        Sujet & Industrialisation d'un produit Data/IA de classification de fraude\\
+        Dataset & Kaggle Credit Card Fraud Detection\\
+        Stack & Python, dlt, DuckDB, dbt, Dagster, MLflow, FastAPI, Streamlit, Docker\\
+        Encadrant & Pr. Mohammed AIT DAOUD\\
+        Equipe & A compléter\\
+    \end{tabular}
+
+    \vfill
+    {\large Année universitaire 2025--2026\par}
+\end{titlepage}
+
+\pagenumbering{roman}
+\tableofcontents
+\listoffigures
+\listoftables
+\clearpage
+
+\pagenumbering{arabic}
+
+\include{chapitres/01_resume}
+\include{chapitres/02_vision}
+\include{chapitres/03_agile}
+\include{chapitres/04_architecture}
+\include{chapitres/05_dataops}
+\include{chapitres/06_qualite}
+\include{chapitres/07_machine_learning}
+\include{chapitres/08_mlops_deploiement}
+\include{chapitres/09_validation}
+\include{chapitres/10_conclusion}
+
+\appendix
+\include{chapitres/annexes}
+
+\end{document}

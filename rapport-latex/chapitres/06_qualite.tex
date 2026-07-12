@@ -1,0 +1,59 @@
+\chapter{Qualité des Données}
+
+\section{Data Contract}
+
+Le contrat de données \repoPath{contracts/creditcard_fraud_contract.yml} définit la structure attendue du dataset:
+
+\begin{itemize}
+    \item \repoPath{Time}: numérique, obligatoire, non nul;
+    \item \repoPath{Amount}: numérique, obligatoire, non nul, supérieur ou égal à zéro;
+    \item \repoPath{Class}: entier, obligatoire, valeurs admises 0 ou 1;
+    \item \repoPath{V1-V28}: numériques, obligatoires, non nuls.
+\end{itemize}
+
+Ce contrat explicite également les règles de qualité et le lineage attendu. Il sert de référence à l'ingestion et à la documentation du pipeline.
+
+\section{Tests dbt}
+
+Le fichier \repoPath{dbt_fraud/models/schema.yml} déclare des tests sur les modèles dbt:
+
+\begin{itemize}
+    \item \repoPath{not_null} sur les colonnes critiques;
+    \item \repoPath{accepted_values} sur la cible \repoPath{Class};
+    \item documentation des features de risque.
+\end{itemize}
+
+Ces tests contrôlent la validité minimale des tables staging et mart avant exploitation par le modèle.
+
+\section{Tests Python}
+
+Le dépôt contient des tests dédiés:
+
+\begin{itemize}
+    \item \repoPath{tests/test_data_contract.py}: validation du contrat de données;
+    \item \repoPath{tests/test_dataset_loader.py}: comportement du loader dataset;
+    \item \repoPath{tests/test_api.py}: preprocessing, feature engineering, endpoints API, métriques et erreurs attendues.
+\end{itemize}
+
+\section{Dimensions de Qualité}
+
+\begin{table}[htbp]
+\centering
+\caption{Analyse des dimensions de qualité}
+\begin{tabularx}{\textwidth}{p{0.24\textwidth}X}
+\toprule
+Dimension & Mise en oeuvre\\
+\midrule
+Complétude & Colonnes requises validées par contrat et tests dbt.\\
+Validité & Types numériques, labels acceptés et montants positifs.\\
+Cohérence & Déduplication au staging et feature engineering déterministe.\\
+Intégrité & Lineage documenté de Kaggle jusqu'au service API.\\
+Fraîcheur & Dataset statique; la fraîcheur temps réel n'est pas applicable dans ce contexte Kaggle.\\
+Observabilité & Métriques runtime et événements de prédiction JSONL.\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Limite Qualité}
+
+Le dataset Kaggle est anonymisé et statique. La qualité métier réelle, comme la vérification client, marchand ou géographie, ne peut pas être contrôlée avec ces variables PCA. Dans un contexte bancaire réel, le contrat devrait être enrichi par des règles métier supplémentaires et des contrôles de dérive temporelle.
