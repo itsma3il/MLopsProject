@@ -30,50 +30,28 @@ Système intelligent de détection de fraude dans les transactions financières 
 
 Le système fonctionne en 3 couches :
 
-```
-┌─────────────────────────────────────────────────────────┐
-│  FRONTEND (Streamlit)                                   │
-│  - Formulaire de prédiction                             │
-│  - Upload CSV batch                                     │
-│  - Dashboard analytique                                 │
-│  - Historique des prédictions                           │
-└────────────────────────┬────────────────────────────────┘
-                         │ HTTP (port 8501 → 8000)
-┌────────────────────────▼────────────────────────────────┐
-│  API (FastAPI)                                          │
-│  - Reçoit les transactions                              │
-│  - Applique le feature engineering                      │
-│  - Exécute le modèle ML (pipeline complet)             │
-│  - Retourne prédiction + probabilité + niveau de risque│
-│  - Persiste les résultats en base                      │
-└────────────────────────┬────────────────────────────────┘
-                         │ SQL (port 5432)
-┌────────────────────────▼────────────────────────────────┐
-│  BASE DE DONNÉES (PostgreSQL)                           │
-│  - Stocke l'historique des prédictions                  │
-│  - Permet l'analyse rétrospective                      │
-└─────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Frontend["Streamlit frontend<br/>Prediction form<br/>Batch CSV upload<br/>Analytics dashboard<br/>Prediction history"]
+    API["FastAPI service<br/>Input validation<br/>Feature engineering<br/>ML pipeline inference<br/>Risk score response"]
+    DB[("PostgreSQL<br/>Prediction history<br/>Retrospective analysis")]
+
+    Frontend -->|"HTTP<br/>8501 to 8000"| API
+    API -->|"SQL<br/>5432"| DB
 ```
 
 ### Flux de prédiction
 
-```
-Transaction brute (Time, Amount, V1-V28)
-        │
-        ▼
-Feature Engineering (9 features dérivées)
-        │
-        ▼
-Alignement des colonnes (39 features)
-        │
-        ▼
-Pipeline ML (RobustScaler → Classifier)
-        │
-        ▼
-Résultat: {prediction, probabilité, niveau_risque}
-        │
-        ▼
-Sauvegarde en PostgreSQL
+```mermaid
+flowchart LR
+    Raw["Raw transaction<br/>Time, Amount, V1-V28"]
+    Features["Feature engineering<br/>9 derived features"]
+    Align["Column alignment<br/>39 expected features"]
+    Pipeline["ML pipeline<br/>RobustScaler + classifier"]
+    Result["Prediction output<br/>prediction, probability, risk level"]
+    History[("PostgreSQL<br/>prediction history")]
+
+    Raw --> Features --> Align --> Pipeline --> Result --> History
 ```
 
 Le modèle sauvegardé est un **pipeline complet** (`imblearn.Pipeline`) qui contient :
@@ -87,49 +65,35 @@ Aucun scaling manuel n'est nécessaire à la prédiction : le pipeline gère tou
 
 ## Architecture du projet
 
-```
-MLopsProject/
-├── config/
-│   └── settings.py              # Configuration centralisée (paths, DB, seuils)
-├── src/
-│   ├── core/
-│   │   ├── data/                # Kaggle loader, preprocessing, features, DuckDB/dlt ingestion
-│   │   ├── models/              # Training, evaluation, prediction, metrics
-│   │   ├── monitoring/          # Metrics and monitoring helpers
-│   │   └── pipeline/            # Pipeline runner, dashboard, diagrams
-│   ├── api/                     # FastAPI implementation
-│   ├── db/                      # SQLAlchemy implementation
-│   └── utils/                   # Data contract and shared helpers
-├── api/                         # Compatibility wrappers for uvicorn api.main:app
-├── db/                          # Compatibility wrappers for old imports
-├── dataops/                     # Compatibility wrapper for ingestion CLI
-├── monitoring/                  # Compatibility wrappers for monitoring imports
-├── webapp/
-│   └── app.py                   # Streamlit (4 pages)
-├── models/                      # Artefacts générés après entraînement
-│   ├── best_model.joblib        # Pipeline complet (scaler+classifier)
-│   ├── scaler.joblib            # Scaler seul (backup)
-│   ├── feature_columns.json     # Liste des 39 colonnes attendues
-│   └── metrics.json             # Métriques d'évaluation
-├── data/
-│   ├── raw/                     # Dataset Kaggle (creditcard.csv)
-│   └── processed/               # X_test.csv, y_test.csv
-├── notebooks/
-│   └── colab/                   # Google Colab training/evaluation notebook
-├── tests/
-│   ├── unit/                    # Unit tests
-│   └── integration/             # API/integration tests
-├── docs/
-│   ├── guides/                  # Install, usage, Colab guide
-│   ├── architecture/            # Architecture and model diagnosis
-│   ├── project/                 # Vision, Agile, final report
-│   └── reports/                 # Change/results notes and experiments
-├── reports/
-│   └── latex/                   # Academic LaTeX report
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-└── .dockerignore
+```mermaid
+flowchart TB
+    Root["MLopsProject"]
+
+    Root --> Config["config/<br/>Central settings"]
+    Root --> Src["src/"]
+    Root --> Ops["Operational entrypoints"]
+    Root --> Data["data/<br/>Raw, processed, warehouse"]
+    Root --> Models["models/<br/>Generated ML artifacts"]
+    Root --> Docs["docs/<br/>Guides, architecture, project, reports"]
+    Root --> Tests["tests/<br/>Unit and integration"]
+    Root --> Reports["reports/latex<br/>Academic report"]
+    Root --> Runtime["Dockerfile<br/>docker-compose.yml<br/>requirements.txt"]
+
+    Src --> CoreData["core/data<br/>Kaggle loader, preprocessing, features, ingestion"]
+    Src --> CoreModels["core/models<br/>Training, evaluation, prediction, metrics"]
+    Src --> CoreMonitoring["core/monitoring<br/>Metrics and drift helpers"]
+    Src --> CorePipeline["core/pipeline<br/>Runner, dashboard, diagrams"]
+    Src --> ApiImpl["api<br/>FastAPI implementation"]
+    Src --> DbImpl["db<br/>SQLAlchemy implementation"]
+    Src --> Utils["utils<br/>Data contract and shared helpers"]
+
+    Ops --> ApiCompat["api/<br/>uvicorn compatibility wrappers"]
+    Ops --> DbCompat["db/<br/>legacy DB import wrappers"]
+    Ops --> DataOpsCompat["dataops/<br/>ingestion CLI wrapper"]
+    Ops --> MonitoringCompat["monitoring/<br/>monitoring wrappers"]
+    Ops --> Webapp["webapp/<br/>Streamlit app"]
+    Ops --> Dbt["dbt_fraud/<br/>dbt transformations/tests"]
+    Ops --> Dagster["dagster_project/<br/>orchestration assets"]
 ```
 
 ### MLOps & DataOps
@@ -265,35 +229,25 @@ Cela lance les 3 services automatiquement :
 
 ### Méthodologie anti-leakage
 
-```
-Raw Data
-    │
-    ▼
-Clean (suppression doublons, NaN, cap Amount P99)
-    │
-    ▼
-Feature Engineering (sur données BRUTES, avant split)
-    │
-    ▼
-Split stratifié (80% train / 20% test)
-    │
-    ▼
-Cross-Validation 5-fold sur train set :
-    ┌─────────────────────────────────────┐
-    │  Pour chaque fold :                 │
-    │    1. RobustScaler (fit sur fold)   │
-    │    2. SMOTE (sur fold train only)   │
-    │    3. Classifier (train sur fold)   │
-    └─────────────────────────────────────┘
-    │
-    ▼
-Sélection du meilleur modèle (F1-score)
-    │
-    ▼
-Évaluation finale sur test set INTOUCHÉ
-    │
-    ▼
-Sauvegarde du pipeline complet
+```mermaid
+flowchart TD
+    Raw["Raw data"]
+    Clean["Clean data<br/>remove duplicates, remove NaN, cap Amount P99"]
+    FE["Feature engineering<br/>on raw values before split"]
+    Split["Stratified split<br/>train, validation, untouched test"]
+    CV["Cross-validation on train set"]
+    Scale["RobustScaler<br/>fit inside each fold"]
+    SMOTE["SMOTE<br/>train fold only"]
+    Classifier["Classifier training"]
+    Select["Best model selection<br/>validation PR-AUC/F1"]
+    Threshold["Decision threshold optimization<br/>validation set only"]
+    Test["Final evaluation<br/>untouched test set"]
+    Save["Save complete pipeline<br/>model, threshold, metrics, features"]
+
+    Raw --> Clean --> FE --> Split --> CV
+    CV --> Scale --> SMOTE --> Classifier --> Select
+    Split --> Threshold
+    Select --> Threshold --> Test --> Save
 ```
 
 ### Features engineered (9)

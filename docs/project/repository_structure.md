@@ -4,33 +4,45 @@ This repository now uses a clean source layout while keeping backward-compatible
 
 ## Canonical Layout
 
-```text
-MLopsProject/
-├── src/
-│   ├── core/
-│   │   ├── data/          # Kaggle loader, preprocessing, feature engineering, dlt/DuckDB ingestion
-│   │   ├── models/        # Training, evaluation, prediction, threshold and metrics logic
-│   │   ├── monitoring/    # Prometheus-style metrics, drift/reference stats
-│   │   └── pipeline/      # Local pipeline runner, dashboard, diagram generation
-│   ├── api/               # FastAPI application implementation
-│   ├── db/                # SQLAlchemy database implementation
-│   └── utils/             # Data contract validation and shared helpers
-├── api/                   # Compatibility wrappers for uvicorn api.main:app
-├── db/                    # Compatibility wrappers for legacy imports
-├── dataops/               # Compatibility wrapper for ingestion CLI
-├── monitoring/            # Compatibility wrappers for monitoring imports
-├── dbt_fraud/             # dbt project for DuckDB transformations and tests
-├── dagster_project/       # Dagster assets for orchestration
-├── notebooks/colab/       # Google Colab training/evaluation notebook
-├── docs/
-│   ├── guides/            # Installation, usage, Colab guide
-│   ├── architecture/      # Architecture and modeling diagnosis
-│   ├── project/           # Vision, Agile, final report, repository structure
-│   └── reports/           # Change logs and experiment notes
-├── tests/
-│   ├── unit/
-│   └── integration/
-└── reports/latex/         # Academic LaTeX report
+```mermaid
+flowchart TB
+    Root["MLopsProject"]
+
+    Root --> Src["src"]
+    Root --> Compat["Compatibility wrappers"]
+    Root --> Orchestration["Orchestration and transformations"]
+    Root --> Delivery["Documentation and deliverables"]
+    Root --> Quality["Tests"]
+    Root --> Runtime["Runtime files"]
+
+    Src --> Data["core/data<br/>Kaggle loader<br/>preprocessing<br/>feature engineering<br/>dlt/DuckDB ingestion"]
+    Src --> Models["core/models<br/>training<br/>evaluation<br/>prediction<br/>threshold metrics"]
+    Src --> Monitoring["core/monitoring<br/>Prometheus metrics<br/>drift reference stats"]
+    Src --> Pipeline["core/pipeline<br/>local runner<br/>dashboard<br/>diagram generation"]
+    Src --> ApiImpl["api<br/>FastAPI implementation"]
+    Src --> DbImpl["db<br/>SQLAlchemy implementation"]
+    Src --> Utils["utils<br/>data contract validation<br/>shared helpers"]
+
+    Compat --> ApiCompat["api<br/>uvicorn api.main:app"]
+    Compat --> DbCompat["db<br/>legacy DB imports"]
+    Compat --> DataOpsCompat["dataops<br/>ingestion CLI"]
+    Compat --> MonitoringCompat["monitoring<br/>legacy monitoring imports"]
+
+    Orchestration --> DBT["dbt_fraud<br/>DuckDB transformations and tests"]
+    Orchestration --> Dagster["dagster_project<br/>Dagster assets"]
+
+    Delivery --> Guides["docs/guides<br/>install, usage, Colab"]
+    Delivery --> Architecture["docs/architecture<br/>architecture, model diagnosis"]
+    Delivery --> ProjectDocs["docs/project<br/>vision, Agile, final report"]
+    Delivery --> ReportDocs["docs/reports<br/>changes, experiment notes"]
+    Delivery --> Latex["reports/latex<br/>academic report"]
+    Delivery --> Colab["notebooks/colab<br/>training/evaluation notebook"]
+
+    Quality --> Unit["tests/unit"]
+    Quality --> Integration["tests/integration"]
+
+    Runtime --> Docker["Dockerfile<br/>docker-compose.yml"]
+    Runtime --> Requirements["requirements.txt<br/>requirements-colab.txt"]
 ```
 
 ## Import Policy

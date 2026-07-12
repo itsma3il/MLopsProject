@@ -3,10 +3,29 @@
 ## Vue d'ensemble
 Le projet suit une chaîne DataOps/MLOps complète:
 
-```text
-Kaggle -> data/raw -> dlt -> DuckDB -> dbt -> sklearn/imblearn -> MLflow -> FastAPI -> Streamlit
-                                      \-> dbt docs/tests
-                         Dagster orchestre ingestion, transformation, training, evaluation, monitoring
+```mermaid
+flowchart LR
+    Kaggle[("Kaggle<br/>mlg-ulb/creditcardfraud")]
+    Raw["data/raw<br/>creditcard.csv"]
+    DLT["dlt ingestion"]
+    DuckDB[("DuckDB<br/>data/warehouse/fraud.duckdb")]
+    DBT["dbt<br/>staging, marts, tests, docs"]
+    ML["sklearn + imblearn<br/>training/evaluation"]
+    MLflow["MLflow<br/>tracking + registry"]
+    API["FastAPI<br/>prediction service"]
+    Streamlit["Streamlit<br/>demo UI"]
+    Monitoring["Monitoring<br/>metrics + drift references"]
+    Dagster["Dagster<br/>orchestration"]
+
+    Kaggle --> Raw --> DLT --> DuckDB --> DBT --> ML --> MLflow --> API --> Streamlit
+    API --> Monitoring
+    DBT --> DBTDocs["dbt docs + lineage"]
+
+    Dagster -. orchestrates .-> Raw
+    Dagster -. orchestrates .-> DLT
+    Dagster -. orchestrates .-> DBT
+    Dagster -. orchestrates .-> ML
+    Dagster -. orchestrates .-> Monitoring
 ```
 
 ## Composants
@@ -24,14 +43,26 @@ Kaggle -> data/raw -> dlt -> DuckDB -> dbt -> sklearn/imblearn -> MLflow -> Fast
 - CI/CD: GitHub Actions teste et construit l'image container.
 
 ## Lineage
-1. Kaggle dataset.
-2. `data/raw/creditcard.csv`.
-3. dlt vers `raw.creditcard_transactions`.
-4. dbt `stg_transactions`.
-5. dbt `fraud_features`.
-6. `src/core/models/train.py` produit `models/best_model.joblib`, `metrics.json`, `reference_stats.json`.
-7. MLflow enregistre expérience et modèle.
-8. FastAPI sert les prédictions et écrit les événements de monitoring.
+
+```mermaid
+flowchart TD
+    Source["Kaggle dataset"]
+    Cache["data/raw/creditcard.csv"]
+    RawTable["DuckDB raw.creditcard_transactions"]
+    Staging["dbt stg_transactions"]
+    Mart["dbt fraud_features"]
+    Train["src/core/models/train.py"]
+    Artifacts["models/<br/>best_model.joblib<br/>metrics.json<br/>reference_stats.json"]
+    Registry["MLflow run + registered model"]
+    Serving["FastAPI predictions"]
+    Events["data/monitoring/prediction_events.jsonl"]
+
+    Source --> Cache --> RawTable --> Staging --> Mart --> Train
+    Train --> Artifacts
+    Train --> Registry
+    Artifacts --> Serving
+    Serving --> Events
+```
 
 ## Monitoring
 - Disponibilité: `GET /health`.
